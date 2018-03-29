@@ -1,6 +1,7 @@
 package com.pierfrancescosoffritti.youtubeplayer.ui;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -9,6 +10,8 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -96,10 +99,33 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
         seekBar = controlsView.findViewById(R.id.seek_bar);
 
         seekBar.setOnSeekBarChangeListener(this);
-        panel.setOnClickListener(this);
+//        panel.setOnClickListener(this);
         playPauseButton.setOnClickListener(this);
         menuButton.setOnClickListener(this);
         fullScreenButton.setOnClickListener(this);
+
+        panel.setOnTouchListener(new View.OnTouchListener() {
+
+            GestureDetector detector;
+
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(final View view, MotionEvent motionEvent) {
+
+                if (detector == null) {
+                    detector = new GestureDetector(view.getContext(), new GestureDetector.SimpleOnGestureListener() {
+                        @Override
+                        public boolean onSingleTapUp(MotionEvent e) {
+                            onClick(view);
+                            return super.onSingleTapUp(e);
+                        }
+                    });
+                }
+
+                detector.onTouchEvent(motionEvent);
+                return false;
+            }
+        });
     }
 
     @Override
