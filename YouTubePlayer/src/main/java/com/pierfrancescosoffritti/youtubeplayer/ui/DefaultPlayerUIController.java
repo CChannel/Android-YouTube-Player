@@ -58,6 +58,7 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
 
     @Nullable private View.OnClickListener onFullScreenButtonListener;
     @Nullable private View.OnClickListener onMenuButtonClickListener;
+    @Nullable private OnControlVisibilityChangeListener onControlVisibilityChangeListener;
 
     // view state
     private boolean isPlaying = false;
@@ -116,6 +117,10 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
     public void showUI(boolean show) {
         int visibility = show ? View.VISIBLE : View.INVISIBLE;
         controlsRoot.setVisibility(visibility);
+
+        if (onControlVisibilityChangeListener != null) {
+            onControlVisibilityChangeListener.onControlVisibilityChange(controlsRoot.getVisibility());
+        }
 
         showUI = show;
     }
@@ -242,6 +247,10 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
         this.onFullScreenButtonListener = customFullScreenButtonClickListener;
     }
 
+    public void setOnControlVisibilityChangeListener(@NonNull OnControlVisibilityChangeListener onControlVisibilityChangeListener) {
+        this.onControlVisibilityChangeListener = onControlVisibilityChangeListener;
+    }
+
     @Override
     public void onClick(View view) {
         if(view == panel)
@@ -313,14 +322,25 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
                 .setListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animator) {
-                        if (finalAlpha == 1f)
+                        if (finalAlpha == 1f) {
                             controlsRoot.setVisibility(View.VISIBLE);
+
+                            if (onControlVisibilityChangeListener != null) {
+                                onControlVisibilityChangeListener.onControlVisibilityChange(controlsRoot.getVisibility());
+                            }
+                        }
+
                     }
 
                     @Override
                     public void onAnimationEnd(Animator animator) {
-                        if (finalAlpha == 0f)
+                        if (finalAlpha == 0f) {
                             controlsRoot.setVisibility(View.GONE);
+
+                            if (onControlVisibilityChangeListener != null) {
+                                onControlVisibilityChangeListener.onControlVisibilityChange(controlsRoot.getVisibility());
+                            }
+                        }
                     }
 
                     @Override public void onAnimationCancel(Animator animator) { }
@@ -485,5 +505,9 @@ public class DefaultPlayerUIController implements PlayerUIController, View.OnCli
             }
         });
 //        youTubeButton.setOnClickListener(null);
+    }
+
+    public interface OnControlVisibilityChangeListener {
+        void onControlVisibilityChange(int visibility);
     }
 }
